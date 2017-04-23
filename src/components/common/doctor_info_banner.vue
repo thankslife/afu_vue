@@ -1,6 +1,9 @@
 <template>
-	<div class="banner_box">
-		<img src="../../images/personal_default_img.jpg" height="220" width="220" alt="" class="personal_img">
+	<div class="banner_box" id="doctorInfoBannerBox">
+        <span class="ceo_icon"></span>
+		<div class="personal_img_box" :canEdit="canEdit" @click="edit" :class="{hide: hideProfileImg}">
+            <img src="../../images/personal_default_img.jpg" alt="" class="personal_img">
+        </div>
 		<div class="personal_info_box">
 			<div class="personal_name_box">
 				<span class="doctor_name">钱阿福</span>
@@ -15,12 +18,13 @@
 <script>
 	export default {
 		mounted(){
-      
         },
-        props: [],
+        props: ['canEdit', 'hideProfileImg'],
         methods: {
-            fn() {
-                
+            edit() {
+                if(this.canEdit) {
+                    console.log(456);
+                }
             }
         }
 	}
@@ -29,25 +33,45 @@
 <style scoped>
 	.banner_box {
 		text-align: center;
+        padding: 0 0 .6rem 0;
+        background: url('../../images/doctor_info_banner_cover.jpg') center no-repeat;
+        background-size: cover;
 	}
+
 	.doctor_info {
 		text-align: center;
 	}
 
-	.banner_box {
-		padding: 0.772947rem 0;
-		background: url('../../images/doctor_info_banner_cover.jpg') center no-repeat;
-		background-size: cover;
-	}
+    .ceo_icon {
+        display: inline-block;
+        width: 3.092rem;
+        height: 1rem;
+        background: url('../../images/ceo_icon.png') center no-repeat;
+        background-size: 100% auto;
+        font-size: 0;
+        margin-top: .8rem;
+        margin-bottom: .6rem;
+    }
+
+    .personal_img_box {
+        width: 3.864734rem;
+        height: 3.864734rem;
+        border-radius: 50%;
+        overflow: hidden;
+        margin: 0 auto;
+        border: 1px solid #dedede;
+    }
+
+    .personal_img_box.hide {
+        visibility: hidden;
+    }
 
 	.personal_img {
-		width: 3.864734rem;
-		height: 3.864734rem;
-		border-radius: 100px;
+		width: 100%;
 	}
 
 	.personal_info_box {
-		margin-top: 0.772947rem;
+		margin-top: 0.4rem;
 	}
 
 	.personal_name_box {

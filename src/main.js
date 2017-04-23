@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import routes from './router'
 import ajax from './config/ajax'
 import FastClick from 'fastclick'
+import $ from 'jquery'
 import './style/common.css'
 import './config/rem'
 
@@ -16,15 +17,15 @@ if ('addEventListener' in document) {
 
 Vue.use(VueRouter)
 const router = new VueRouter({
-	mode: 'history',
-	routes
+    mode: 'history',
+    routes
 })
 
 router.beforeEach((to, from, next) => {
-	document.title = to.meta.title;
-	next()
+    document.title = to.meta.title;
+    next()
 })
 
 new Vue({
-	router,
+    router,
 }).$mount('#app')

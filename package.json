@@ -10,7 +10,9 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "eve": "^0.5.4",
     "fastclick": "^1.0.6",
+    "jquery": "^3.2.1",
     "vue": "^2.2.2",
     "vue-router": "^2.3.0"
   },

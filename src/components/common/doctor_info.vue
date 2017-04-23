@@ -34,18 +34,18 @@
 			</div>
 		</section>
 	</section>
-	
+
 </template>
 
 <script>
 	export default {
 		mounted(){
-      
+
         },
         props: [],
         methods: {
             fn() {
-                
+
             }
         }
 	}
@@ -63,8 +63,8 @@
 	}
 
 	.personal_img {
-		width: 3.864734rem;
-		height: 3.864734rem;
+		width: 3.865rem;
+		height: 3.865rem;
 		border-radius: 100px;
 	}
 
