@@ -11,7 +11,7 @@
     <title>钱阿福诊所</title>
   </head>
   <body>
-    <div id="app">
+    <div id="app" :class="{win_ofh: this.$store.state.spreadSidebar}">
       <router-view></router-view>
     </div>
   </body>

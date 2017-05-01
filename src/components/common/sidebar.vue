@@ -1,8 +1,8 @@
 <template>
     <div class="sidebar_out_box">
-        <span @click="isShow = !isShow" class="sidebar_btn"></span>
-        <div class="sidebar_box" v-bind:class="{ show: isShow }" @click.self="isShow = !isShow">
-            <div class="sidebar_hover" @click.self="isShow = !isShow"></div>
+        <span @click="toggleSideBar(true);" class="sidebar_btn"></span>
+        <div class="sidebar_box" v-bind:class="{ show: isShow }" @click.self="isShow = !isShow;">
+            <div class="sidebar_hover" @click.self="toggleSideBar(false);"></div>
             <div class="sidebar_content">
                 <!-- <div class="sidebar_bg"></div> -->
                 <div class="sidebar">
@@ -11,13 +11,13 @@
                         <li v-for="item in sidebarMenu" v-bind:class="{ active: item.isActive }">
 
                             <template v-if="item.isLink">
-                                <router-link :to="item.to">{{item.itemName}}</router-link>
+                                <i class="item_icon" :style="'background-image: url(' + item.icon + ');'"></i><span @click.self="handleLink(item.to);">{{item.itemName}}</span><span v-if="item.tip" class="item_tip">{{item.tip}}</span>
                             </template>
 
                             <template v-else>
-                                <span @click.self="item.isActive = !item.isActive;">{{item.itemName}}</span>
+                                <i class="item_icon" :style="'background-image: url(' + item.icon + ');'"></i><span @click.self="item.isActive = !item.isActive;item.icon = item.isActive ? item.activeIcon : item.noIcon">{{item.itemName}}</span>
                                 <ul class="sidebar_sub_menu">
-                                    <li v-for="subItem in item.subList"><router-link to="subItem.to">{{subItem.itemName}}</router-link></li>
+                                    <li v-for="subItem in item.subList"><i class="item_icon" :style="'background-image: url(' + item.icon + ');'"></i><span @click="handleLink(subItem.to)">{{subItem.itemName}}</span></li>
                                 </ul>
                             </template>
 
@@ -44,15 +44,26 @@ export default {
             canEdit: true,
             sidebarMenu: [
                 {
-                    itemName: '查看日历',
-                    to: '/calendars',
+                    itemName: '日历查看',
+                    to: '/calendar',
                     isActive: false,
+                    icon: require('../../images/calendar_icon.png'),
                     isLink: true
                 },
                 {
-                    itemName: '诊所管理',
+                    itemName: '我的人脉',
+                    to: '/calendars',
+                    isActive: false,
+                    icon: require('../../images/connection_icon.png'),
+                    isLink: true
+                },
+                {
+                    itemName: '我的诊所',
                     isLink: false,
                     isActive: false,
+                    icon: require('../../images/clinic_icon.png'),
+                    noIcon: require('../../images/clinic_icon.png'),
+                    activeIcon: require('../../images/clinic_active_icon.png'),
                     subList: [
                         {
                             itemName: '我的病历',
@@ -77,21 +88,18 @@ export default {
                     ]
                 },
                 {
-                    itemName: '我的人脉',
+                    itemName: '系统消息',
                     to: '/calendars',
                     isActive: false,
-                    isLink: true
-                },
-                {
-                    itemName: '消息中心',
-                    to: '/calendars',
-                    isActive: false,
+                    tip: 5,
+                    icon: require('../../images/sys_msg_icon.png'),
                     isLink: true
                 },
                 {
                     itemName: '意见反馈',
                     to: '/calendars',
                     isActive: false,
+                    icon: require('../../images/suggess_icon.png'),
                     isLink: true
                 },
             ],
@@ -101,6 +109,16 @@ export default {
     },
     components: {
         doctorInfoBanner
+    },
+    methods: {
+        toggleSideBar(msg) {
+            this.isShow = !this.isShow;
+            this.$store.commit('TOGGLE_SIDEBAR', {spreadSidebar: msg})
+        },
+        handleLink(src) {
+            this.toggleSideBar(false);
+            this.$router.push(src);
+        }
     },
 }
 </script>
@@ -153,7 +171,7 @@ export default {
 
     .sidebar_content {
         position: absolute;
-        width: 80%;
+        width: 66%;
         height: 100%;
         left: -100%;
         top: 0;
@@ -205,12 +223,16 @@ export default {
         box-sizing: border-box;
     }
 
+    .sidebar_menu>li {
+        position: relative;
+    }
+
     .sidebar_sub_menu {
-        background: #f9f9f9;
+        background: #74cbd9;
     }
 
     .sidebar_sub_menu li:nth-child(even) {
-        background: #f3f3f3;
+        background: #83d0dc;
     }
 
     .sidebar_sub_menu li {
@@ -219,8 +241,44 @@ export default {
         overflow: hidden;
     }
 
+    .sidebar_menu li.active {
+        background: #66c6d5;
+        color: #fff;
+    }
+
     .sidebar_menu li.active .sidebar_sub_menu li {
         height: 1.932rem;
+    }
+
+    .sidebar_menu span,
+    .sidebar_menu a {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .sidebar_menu .item_icon {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background: url('../../images/calendar_icon.png') center no-repeat;
+        background-size: 100% auto;
+        vertical-align: middle;
+        margin-right: 10px;
+    }
+
+    .sidebar_menu .item_tip {
+        position: absolute;
+        right: 20%;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #f29b5a;
+        color: #fff;
+        border-radius: 100px;
+        min-width: 12px;
+        height: 16px;
+        line-height: 16px;
+        font-size: 12px;
+        padding: 2px 4px;
     }
 
     @keyframes flexible_animate {

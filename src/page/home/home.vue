@@ -1,5 +1,5 @@
 <template>
-    <div class="home_container">
+    <div class="home_container main_container_box" :class="{slide_left: this.$store.state.spreadSidebar}">
         <function-menu :fnList="fnList"></function-menu>
     	<slidebar></slidebar>
         <search></search>
@@ -12,7 +12,14 @@
                     <p>我的订单</p>
                 </div>
                 <div class="item_content_box">
-                    新增订单<strong>{{orderNum}}</strong>个
+                    <template v-if="orderData">
+                        <p>你有<strong>{{orderData.newOrder}}</strong>个新病历</p>
+                        <p>你有<strong>{{orderData.transferOrder}}</strong>个转诊病历</p>
+                    </template>
+                    <template v-else>
+                        <router-link to="/calendars">点击进入患者接诊区</router-link>
+                    </template>
+
                 </div>
             </div>
 
@@ -22,7 +29,12 @@
                     <p>我的留言</p>
                 </div>
                 <div class="item_content_box">
-                    留言消息<strong>{{messageNum}}</strong>个
+                    <template v-if="messageNum">
+                        <p>你有<strong>{{messageNum}}</strong>条未读消息</p>
+                    </template>
+                    <template v-else>
+                        <router-link to="/calendars">点击以观看留言消息</router-link>
+                    </template>
                 </div>
             </div>
 
@@ -32,24 +44,31 @@
                     <p>我的人脉</p>
                 </div>
                 <div class="item_content_box">
-                    新加入你的人脉
-                    <ul class="connection_list">
-                        <li v-for="item in connectionList">
-                            <span class="connection_personal_img" :style="'background-image: url(' + item.imgUrl + ');'"></span>
-                        </li>
-                    </ul>
+                    <template v-if="connectionList">
+                        新加入你的人脉
+                        <ul class="connection_list">
+                            <li v-for="item in connectionList">
+                                <span class="connection_personal_img" :style="'background-image: url(' + item.imgUrl + ');'"></span>
+                            </li>
+                        </ul>
+                    </template>
+                    <template v-else>
+                        <router-link to="/calendars">点击看看你的人脉圈增加你的人脉网络</router-link>
+                    </template>
                 </div>
             </div>
 
-            <div class="contain_item content_box">
-                <div class="item_name_box">
-                    <span class="item_icon my_wallet"></span>
-                    <p>我的钱包</p>
+            <template v-if="income">
+                <div class="contain_item content_box">
+                    <div class="item_name_box">
+                        <span class="item_icon my_wallet"></span>
+                        <p>我的钱包</p>
+                    </div>
+                    <div class="item_content_box">
+                        你有<strong>{{income}}</strong>笔新收入
+                    </div>
                 </div>
-                <div class="item_content_box">
-                    你有<strong>{{income}}</strong>笔新收入
-                </div>
-            </div>
+            </template>
         </div>
     </div>
 </template>
@@ -133,8 +152,11 @@ export default {
                     imgUrl: require('../../images/connection4.jpg')
                 }
             ],
-            orderNum: 16,
-            messageNum: 3,
+            orderData: {
+                newOrder: 16,
+                transferOrder: 10
+            },
+            messageNum: 9,
             income: 9,
 		}
 	},
@@ -154,6 +176,10 @@ export default {
 
 <style scoped>
 
+    body {
+        background: #f4f5f7;
+    }
+
     .main_contain {
         padding-top: 0.618rem;
         color: #434a54;
@@ -164,6 +190,17 @@ export default {
         width: 90%;
         margin: 1rem auto;
         padding: 1rem 0;
+        position: relative;
+    }
+
+    .contain_item:before {
+        content: '';
+        position: absolute;
+        left: 40%;
+        top: 0;
+        bottom: 0;
+        width: 0;
+        border-right: 1px solid #eaeced;
     }
 
     .item_name_box, .item_content_box {
@@ -173,7 +210,7 @@ export default {
     }
 
     .item_name_box {
-        width: 46%;
+        width: 50%;
         text-align: center;
         padding-right: 10%;
     }
@@ -204,11 +241,15 @@ export default {
         background-image: url('../../images/my_order_icon.png');
     }
 
+    .item_content_box {
+        line-height: 1.5;
+    }
+
     .item_content_box strong {
-        font-size: 18px;
+        font-size: 20px;
         font-weight: bolder;
-        margin: 0 5px;
-        vertical-align: text-bottom;
+        margin: 0 10px;
+        vertical-align: middle;
     }
 
     .connection_list {

@@ -2,7 +2,7 @@
     <div class="function_menu_out_box" :class="{active: isActive}">
         <span class="function_menu_btn" @click="upadteRightList" v-if="showFunctionMenuBtn"></span>
         <ul class="function_menu_list" v-bind:class="{active: isActive}">
-            <li class="animated" :class="{bounceInRight: isAnimate[index]}" v-for="(item, index) in fnList" :style="'right: ' + rightList[index] + 'rem; animation-delay:' + 0.1 * index + 's;'">
+            <li class="animated" :class="{bounceInRight: isAnimate[index]}" v-for="(item, index) in fnList" :style="'right: ' + rightList[index] + 'rem; animation-delay:' + 0.032 * index + 's;'">
                 <router-link v-if="item.isLink" :to="item.to" class="fn_item" :style="'background-image: url(' + item.url + ');'"></router-link>
                 <span v-else class="fn_item" :style="'background-image: url(' + item.url + ');'" @click="item.cb"></span>
 

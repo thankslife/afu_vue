@@ -1,13 +1,16 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import routes from './router'
-import ajax from './config/ajax'
+import fetch from './config/fetch'
 import FastClick from 'fastclick'
+import store from './store'
 import $ from 'jquery'
 import './style/common.css'
 import './config/rem'
+import axios from 'axios'
 
 Vue.config.productionTip = false
+Vue.prototype.$http = axios
 
 if ('addEventListener' in document) {
     document.addEventListener('DOMContentLoaded', function() {
@@ -28,4 +31,5 @@ router.beforeEach((to, from, next) => {
 
 new Vue({
     router,
+    store,
 }).$mount('#app')

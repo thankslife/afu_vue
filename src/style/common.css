@@ -4,7 +4,7 @@ b, i,
 dl, dt, dd, ol, ul, li,
 form, label,
 table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, figcaption, figure, 
+article, aside, canvas, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section, summary,
 time, mark, audio, video {
     margin: 0;
@@ -33,7 +33,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 article,aside,canvas,details,figcaption,figure,
-footer,header,hgroup,menu,nav,section,summary { 
+footer,header,hgroup,menu,nav,section,summary {
     display: block;
 }
 
@@ -78,7 +78,7 @@ table {
 hr {
     display: block;
     height: 1px;
-    border: 0;   
+    border: 0;
     border-top: 1px solid #cccccc;
     margin: 1em 0;
     padding: 0;
@@ -92,20 +92,35 @@ html, body {
     min-height: 100%;
 }
 body {
-    background: #f4f5f7;
     color: #929292;
+}
+
+.win_ofh {
+    overflow: hidden;
+    height: 100vh;
 }
 
 .content_box {
     background: #fff;
     border-radius: 4px;
     box-shadow: 0 0 10px 3px rgba(0, 0, 0, .1);
+    box-sizing: border-box;
+}
+
+.main_container_box {
+    position: relative;
+    left: 0;
+    transition: left .32s;
+}
+
+.main_container_box.slide_left {
+    left: 66%;
 }
 
 /* @font-face {
     font-family: 'GothamMedium';
     src: url(../fonts/Gotham-Medium.eot);
-    src: local('O'), 
+    src: local('O'),
         url(../fonts/Gotham-Medium.woff) format('woff'),
         url(../fonts/Gotham-Medium.ttf) format('truetype');
     font-weight: normal;
@@ -115,7 +130,7 @@ body {
 @font-face {
     font-family: 'GothamLight';
     src: url(../fonts/Gotham-Light.eot);
-    src: local('O'), 
+    src: local('O'),
         url(../fonts/Gotham-Light.woff) format('woff'),
         url(../fonts/Gotham-Light.ttf) format('truetype');
     font-weight: normal;
