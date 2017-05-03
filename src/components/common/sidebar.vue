@@ -52,7 +52,7 @@ export default {
                 },
                 {
                     itemName: '我的人脉',
-                    to: '/calendars',
+                    to: '/my_connection',
                     isActive: false,
                     icon: require('../../images/connection_icon.png'),
                     isLink: true
@@ -89,7 +89,7 @@ export default {
                 },
                 {
                     itemName: '系统消息',
-                    to: '/calendars',
+                    to: '/my_message',
                     isActive: false,
                     tip: 5,
                     icon: require('../../images/sys_msg_icon.png'),
