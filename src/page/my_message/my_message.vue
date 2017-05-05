@@ -21,6 +21,22 @@
 					
 				</div>
 			</router-link>
+			<router-link to="/message_detail" class="contain_item content_box">
+				<div class="person_img_box">
+					<img src="../../images/connection4.jpg" alt="">
+				</div>
+				<div class="info_box">
+					<div class="message_info">
+						<span class="person_name">李溜溜</span>
+						<span class="message_time">12:25</span>
+					</div>
+					<div class="message_content_box">
+						<p class="message_content">李医生,上次你转给我的患者，我向他要了相关的资料，然后后面的文本是什么呢~呃~布吉岛~凑个数~嗷呜</p>
+						<span class="message_num_tip">2</span>
+					</div>
+					
+				</div>
+			</router-link>
 		</div>
 	</div>
 </template>
@@ -65,16 +81,6 @@ export default {
         background-size: 100% auto;
         min-height: 100vh;
 	}
-
-	.my_message_container .ceo_icon {
-        display: block;
-        height: 1rem;
-        background: url('../../images/ceo_icon.png') center no-repeat #f3f5f7;
-        background-size: 3.092rem auto;
-        font-size: 0;
-        padding-top: .8rem;
-        padding-bottom: .6rem;
-    }
 
     .my_message_container .filter_bar {
     	background: #8fb9fb;
