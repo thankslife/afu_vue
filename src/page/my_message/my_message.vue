@@ -18,7 +18,7 @@
 						<p class="message_content">李医生,上次你转给我的患者，我向他要了相关的资料，然后后面的文本是什么呢~呃~布吉岛~凑个数~嗷呜</p>
 						<span class="message_num_tip">2</span>
 					</div>
-					
+
 				</div>
 			</router-link>
 			<router-link to="/message_detail" class="contain_item content_box">
@@ -34,7 +34,7 @@
 						<p class="message_content">李医生,上次你转给我的患者，我向他要了相关的资料，然后后面的文本是什么呢~呃~布吉岛~凑个数~嗷呜</p>
 						<span class="message_num_tip">2</span>
 					</div>
-					
+
 				</div>
 			</router-link>
 		</div>
@@ -76,7 +76,6 @@ export default {
 <style>
 
 	.my_message_container {
-		font-size: 13px;
 		background: url('../../images/message_bg.png') center repeat-y;
         background-size: 100% auto;
         min-height: 100vh;
@@ -124,7 +123,7 @@ export default {
     }
 
     .my_message_main_contain .person_img_box img {
-    	width:99%;
+    	width: 99%;
     	border-radius: 100px;
     	position: absolute;
     	left: 50%;
@@ -134,7 +133,7 @@ export default {
 
     .my_message_main_contain .info_box {
     	width: 80%;
-    	font-size: 13px;
+    	font-size: 12px;
     	padding-left: 0.6rem;
     	line-height: 20px;
     }
@@ -144,7 +143,7 @@ export default {
     }
 
     .my_message_main_contain .person_name {
-    	font-size: 16px;
+    	font-size: 14px;
     }
 
     .my_message_main_contain .message_time {

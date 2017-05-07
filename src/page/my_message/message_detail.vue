@@ -3,7 +3,7 @@
 		<slidebar></slidebar>
 		<span class="ceo_icon"></span>
 
-		<div class="chat_box">
+		<div class="chat_box" :class="{blur_status: this.blurStatus}">
 			<div class="wrapper" id="wrapper">
 				<div class="scroller">
 					<div id="pullDown" class="pull_down">
@@ -37,6 +37,9 @@
 							<li class="dialog_box_others">
 								<span class="dialog content_box">123</span>
 							</li>
+                            <li class="dialog_box_others">
+                                <span class="dialog content_box">你好，我是你的C医O王大头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦</span>
+                            </li>
 						</ul>
 					</div>
 
@@ -45,10 +48,11 @@
 					</div>
 				</div>
 			</div>
-			<div>{{content}}</div>
 			<div class="input_box">
-				<span class="quick_reply_btn" @click.stop="toggleQuickReplyBox"></span>
-				<textarea name="" id="" rows="1" contenteditable="true" @keyup="resizeTextarea($event, 1);"></textarea>
+				<span class="quick_reply_btn" @click.stop="toggleQuickReplyBox" @touchstart.stop=""></span>
+				<textarea name="" id="" rows="1" cols="18" @keyup="resizeTextarea($event, 1);" placeholder="请输入你的信息" v-model="msgContent" id="msgContent" class="msg_content">
+        <div></div>
+                </textarea>
 				<div class="send_box">
 					<a href="javascript:;" class="send_btn">
 						发送<!-- <pre class="tip" ng-if="isMsgEmpty">发送内容不能为空</pre> -->
@@ -57,16 +61,27 @@
 				<div class="split_line"></div>
 				<div class="quick_reply_out_box" id="quickReplyOutBox" @touchstart.stop="">
 					<div class="quick_reply_box">
-						<slider-delete :sliderConf="sliderConf" :noticeHideDeleteBtn="noticeHideDeleteBtn" v-for="item in quickReplyList">
-							<div class="quick_reply_item">
+						<slider-delete :sliderConf="sliderConf" :hideDeleteBtn="item.hideDeleteBtn" v-for="(item, index) in quickReplyList" :key="index" v-on:removeDeleteItem="removeDeleteItem(index)">
+							<div class="quick_reply_item" @dblclick="selectQuickReply(index)">
 								<p>{{item.text}}</p>
 							</div>
 						</slider-delete>
 					</div>
+                    <div class="add_quick_reply_item" @click="addQuickReply"></div>
 				</div>
 			</div>
 		</div>
-		
+        <div class="alert_hover animated" :class="{show: blurStatus}" @click.self="hideAlert">
+            <div class="add_quick_reply_box">
+                <h3 class="quick_reply_box_title">新增常用语</h3>
+                <div class="content_box">
+                    <textarea class="quick_reply_area" v-model="newQuickReply" placeholder="请输入新增常用语"></textarea>
+                </div>
+                <div class="confirm_btn_box">
+                    <span @click="confirmAddQuickReply">确认</span>
+                </div>
+            </div>
+        </div>
 	</div>
 </template>
 
@@ -80,19 +95,24 @@ export default {
 	data: function() {
 		return {
 			quickReplyList: [
-				{'text': '你好，我是你的C医O王大头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦'},
-				{'text': '你好，我是你的C医O里小头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦'},
-				{'text': '你好，我是你的C医O哈大头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦'}
+				{'text': '你好，我是你的C医Q王大头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦', 'hideDeleteBtn': false},
+				{'text': '你好，我是你的C医O里小头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦', 'hideDeleteBtn': false},
+				{'text': '你好，我是你的C医O哈大头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦', 'hideDeleteBtn': false},
+                {'text': '你好，我是你的C医O王大头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦', 'hideDeleteBtn': false},
+                {'text': '你好，我是你的C医O里小头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦', 'hideDeleteBtn': false},
+                {'text': '你好，我是你的C医O哈大头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦', 'hideDeleteBtn': false}
 			],
-			sliderConf:{//滑动配置  
-                distance: 10,  
+			sliderConf:{//左滑删除组件配置，设置为左滑距离超过10时显示删除按钮
+                distance: 10,
             },
-            noticeHideDeleteBtn: false
+            // 出现弹框时弹出蒙层，须将背景虚化，由此变量标识
+            blurStatus: false,
+            newQuickReply: '',
+            msgContent: ''
 		}
 	},
 
 	mounted() {
-		this.noticeHideDeleteBtn = false;
 		var myScroll,
 			pullDownEl, pullDownOffset,
 			pullUpEl, pullUpOffset,
@@ -100,11 +120,11 @@ export default {
 
 		function pullDownAction () {
 			setTimeout(function () {	// <-- Simulate network congestion, remove setTimeout from production!
-				
+
 				console.log('下拉刷新');
 				myScroll.refresh();		// Remember to refresh when contents are loaded (ie: on ajax completion)
 			}, 1000);	// <-- Simulate network congestion, remove setTimeout from production!
-			
+
 		}
 
 		function pullUpAction () {
@@ -116,7 +136,7 @@ export default {
 				var str = '<li class="dialog_box_mine"><span class="dialog content_box">上拉加载的模拟数据</span></li><li class="dialog_box_others"><span class="dialog content_box">123</span></li>';
 
 				$('#msgList').append(str);
-				
+
 				myScroll.refresh();		// Remember to refresh when contents are loaded (ie: on ajax completion)
 			}, 1000);	// <-- Simulate network congestion, remove setTimeout from production!
 		}
@@ -124,9 +144,9 @@ export default {
 		function loaded() {
 			pullDownEl = document.getElementById('pullDown');
 			pullDownOffset = pullDownEl.offsetHeight;
-			pullUpEl = document.getElementById('pullUp');	
+			pullUpEl = document.getElementById('pullUp');
 			pullUpOffset = pullUpEl.offsetHeight;
-			
+
 			myScroll = new iScroll('wrapper', {
 				useTransition: true,
 				topOffset: pullDownOffset,
@@ -161,16 +181,16 @@ export default {
 				onScrollEnd: function () {
 					if (pullDownEl.className.match('flip')) {
 						pullDownEl.className = 'loading';
-						pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Loading...';				
+						pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Loading...';
 						pullDownAction();	// Execute custom function (ajax call?)
 					} else if (pullUpEl.className.match('flip')) {
 						pullUpEl.className = 'loading';
-						pullUpEl.querySelector('.pullUpLabel').innerHTML = 'Loading...';				
+						pullUpEl.querySelector('.pullUpLabel').innerHTML = 'Loading...';
 						pullUpAction();	// Execute custom function (ajax call?)
 					}
 				}
 			});
-			
+
 			setTimeout(function () { document.getElementById('wrapper').style.left = '0'; }, 800);
 		}
 
@@ -180,52 +200,177 @@ export default {
 
 	methods: {
 		resizeTextarea(event, row) {
-	        if (!event) {
-	            return
-	        }
-	        if (!row)
-	            row = 5;
-	        var b = event.target.value.split("\n");
-	        var c = 0;
-	        c += b.length;
-	        var d = event.target.cols;
-	        if (d <= 10) {
-	            d = 12
-	        }
-	        for (var e = 0; e < b.length; e++) {
-	            if (b[e].length >= d) {
-	                c += Math.ceil(b[e].length / d)
-	            }
-	        }
-	        c = Math.max(c, row);
-	        c = c > 4 ? 4 : c;
-	        if (c != event.target.rows) {
-	            event.target.rows = c;
-	        }
-	    },
+            console.log(event.target);
+            if (!event) {
+                return
+            }
+            if (!row) {
+                row = 3;
+                console.log(11223);
+            }
+            var b = event.target.value.split("\n");
+            var c = 0;
+            c += b.length;
+
+            var d = event.target.cols;
+            console.log(d);
+            if (d <= 10) {
+                d = 12
+            }
+            for (var e = 0; e < b.length; e++) {
+                console.log(b[e].length, '===============', d);
+                if (b[e].length >= d) {
+                    c += Math.ceil(b[e].length / d)
+                }
+            }
+            c = Math.max(c, row);
+            console.log(b, c);
+            c = c > 4 ? 4 : c;
+            if (c != event.target.rows) {
+                event.target.rows = c;
+            }
+        },
 
 	    toggleQuickReplyBox() {
 	    	if($('#quickReplyOutBox').is(':visible')) {
 	    		$('#quickReplyOutBox').slideUp(240);
+                this.quickReplyList.forEach(function(item, index) {
+                    if(!item.hideDeleteBtn) {
+                        item.hideDeleteBtn = true;
+                    }
+                });
 	    	} else {
 	    		$('#quickReplyOutBox').slideDown(240);
+                this.quickReplyList.forEach(function(item, index) {
+                if(item.hideDeleteBtn) {
+                    item.hideDeleteBtn = false;
+                }
+            });
+
 	    	}
 	    },
 
 	    hideComponent() {
 	    	$('#quickReplyOutBox').slideUp(240);
-	    	this.noticeHideDeleteBtn = true;
-	    }
+            this.quickReplyList.forEach(function(item, index) {
+                if(!item.hideDeleteBtn) {
+                    item.hideDeleteBtn = true;
+                }
+            });
+	    },
+
+        removeDeleteItem(index) {
+            this.quickReplyList = this.quickReplyList.slice(1);
+            console.log(this.quickReplyList);
+        },
+
+        addQuickReply() {
+            this.blurStatus = true;
+        },
+
+        hideAlert() {
+            this.blurStatus = false;
+        },
+
+        confirmAddQuickReply() {
+            this.blurStatus = false;
+
+            if(this.newQuickReply != '') {
+                this.quickReplyList.push({
+                    'text': this.newQuickReply,
+                    'hideDeleteBtn': false
+                });
+
+                this.newQuickReply = '';
+            }
+        },
+
+        selectQuickReply(index) {
+            this.msgContent = this.quickReplyList[index].text;
+            this.toggleQuickReplyBox();
+            $('#msgContent').facus();
+
+        }
 	},
 	components: {
 		slidebar,
-		sliderDelete, 
+		sliderDelete,
 	}
 }
 </script>
 
 <style>
-	
+
+    .alert_hover {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(232, 232, 232, .8);
+        display: none;
+        z-index: 100000;
+    }
+
+    .alert_hover.show {
+        display: block;
+        animation-name: fadeIn;
+    }
+
+    .chat_box.blur_status {
+        filter: blur(3px);
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .fadeIn {
+      animation-name: fadeIn;
+    }
+
+    .animated {
+        animation-duration: 1s;
+        animation-fill-mode: both;
+    }
+
+    .add_quick_reply_box {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 8px;
+        background: #fff;
+        width: 90%;
+    }
+
+    .add_quick_reply_box .quick_reply_box_title {
+        border-radius: 8px 8px 0 0;
+        background: #333;
+        color: #fff;
+        line-height: 3;
+    }
+
+    .add_quick_reply_box .content_box {
+        margin: 32px auto;
+        width: 90%;
+        height: 150px;
+    }
+
+    .add_quick_reply_box .quick_reply_area {
+        width: 100%;
+        height: 100%;
+        border: none;
+        outline: none;
+    }
+
+
+
 	.message_detail_container .input_box {
 		width: 100%;
 		min-height: 40px;
@@ -243,11 +388,11 @@ export default {
 		vertical-align: bottom;
 		width: 12.5%;
 		height: 40px;
-		background: url('../../images/quick_reply_icon.png') center 4px no-repeat;
+		background: url('../../images/quick_reply_icon.png') center 6px no-repeat;
 		background-size: 26px auto;
 	}
 
-	.message_detail_container textarea {
+	.message_detail_container .msg_content {
 		overflow-x: hidden;
 		overflow-y: auto;
 		width: 70%;
@@ -258,8 +403,11 @@ export default {
 		outline: none;
 		font-size: 14px;
 		padding: 0 5px;
-		margin-bottom: 16px;
+		margin-bottom: 14px;
+        min-height: 16px;
 		resize: none;
+        font-family: 'Microsoft Yahei';
+        letter-spacing: 1px;
 	}
 
 	.message_detail_container .split_line {
@@ -287,16 +435,27 @@ export default {
 		display: none;
 	}
 
-	.quick_reply_item {
+	.message_detail_container .quick_reply_item {
 		line-height: 40px;
 	}
 
-	.quick_reply_item p {
+	.message_detail_container .quick_reply_item p {
 		overflow: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;
 		font-size: 13px;
 	}
+
+    .message_detail_container .add_quick_reply_item {
+        height: 40px;
+        background: url(../../images/add_item_icon.png) center no-repeat;
+        background-size: auto 16px;
+    }
+
+    .message_detail_container .quick_reply_box {
+        max-height: 160px;
+        overflow-y: auto;
+    }
 
 
 
@@ -310,7 +469,7 @@ export default {
 	    background-size: 100% auto;
 	    min-height: 100vh;
 	}
-	
+
 	.message_detail_container .ceo_icon {
 	    display: inline-block;
 	    width: 3.092rem;
@@ -321,19 +480,19 @@ export default {
 	    padding-top: .8rem;
 	    padding-bottom: .6rem;
 	}
-	
+
 	.message_detail_container .patient_info_box {
 	    font-size: 0;
 	    padding: 0.695652rem;
 	}
-	
+
 	.message_detail_container .person_img_box,
 	.message_detail_container .info_box {
 	    display: inline-block;
 	    vertical-align: middle;
 	    box-sizing: border-box;
 	}
-	
+
 	.message_detail_container .person_img_box {
 	    width: 20%;
 	    padding-top: 20%;
@@ -341,7 +500,7 @@ export default {
 	    overflow: hidden;
 	    position: relative;
 	}
-	
+
 	.message_detail_container .person_img_box img {
 	    width: 99%;
 	    border-radius: 100px;
@@ -350,52 +509,52 @@ export default {
 	    top: 50%;
 	    transform: translate(-50%, -50%);
 	}
-	
+
 	.message_detail_container .info_box {
 	    width: 80%;
 	    font-size: 13px;
 	    padding-left: 0.6rem;
 	    line-height: 20px;
 	}
-	
+
 	.message_detail_container .person_name,
 	.message_detail_container .age,
 	.sex_icon {
 	    display: inline-block;
 	    vertical-align: middle;
 	}
-	
+
 	.message_detail_container .person_name {
 	    font-size: 16px;
 	}
-	
+
 	.message_detail_container .age {
 	    margin-left: 0.772947rem;
 	}
-	
+
 	.message_detail_container .sex_icon {
 	    width: 17px;
 	    height: 17px;
 	    background: url('../../images/male_icon.png') center no-repeat;
 	    background-size: 100% auto;
 	}
-	
+
 	.message_detail_container .female_icon {
 	    background-image: url('../../images/female_icon.png');
 	}
-	
+
 	.message_detail_container .male_icon {
 	    background-image: url('../../images/male_icon.png');
 	}
-	
+
 	.message_detail_container .from_box {
 	    color: #666;
 	}
-	
+
 	.message_detail_container .from_box span {
 	    color: #434a54
 	}
-	
+
 	.message_detail_container .chat_box {
 	    height: calc(100vh - 2.48rem);
 	    text-align: left;
@@ -403,7 +562,7 @@ export default {
 	    color: #434a54;
 	    margin: 0 auto;
 	}
-	
+
 	.message_detail_container .chat_box h4 {
 	    text-align: center;
 	    line-height: 50px;
@@ -412,38 +571,42 @@ export default {
 	    margin: 0 auto;
 	    margin-bottom: 10px;
 	}
-	
+
 	.message_detail_container .msg_box {
 	    overflow: hidden;
 	    min-height: 100%;
 	    padding: 3%;
 	}
-	
+
 	.message_detail_container .wrapper #loadMore {
 	    text-align: center;
 	    margin: 0 0 10px 0;
 	    font-size: 12px;
 	    color: #aaa;
 	}
-	
+
 	.message_detail_container .msg_list {
 	    margin-top: 0.772947rem;
 	}
-	
+
+    .message_detail_container .msg_list li {
+        line-height: 1.5;
+    }
+
 	.message_detail_container .dialog_box_mine,
 	.message_detail_container .dialog_box_others {
 	    display: block;
 	    margin-bottom: 0.772947rem;
 	}
-	
+
 	.message_detail_container .dialog_box_mine {
 	    text-align: right;
 	}
-	
+
 	.message_detail_container .dialog_box_others {
 	    text-align: left;
 	}
-	
+
 	.message_detail_container .dialog {
 	    position: relative;
 	    display: inline-block;
@@ -455,17 +618,17 @@ export default {
 	    -moz-box-sizing: border-box;
 	    box-sizing: border-box;
 	}
-	
+
 	.message_detail_container .dialog_box_mine .dialog {
 	    background: #8fb9fb;
 	    min-height: 32px;
 	}
-	
+
 	.message_detail_container .dialog_box_others .dialog {
 	    background: #fff;
 	    min-height: 32px;
 	}
-	
+
 	.message_detail_container .sys_tip {
 	    line-height: 18px;
 	    display: block;
@@ -475,7 +638,7 @@ export default {
 	    text-align: center;
 	    margin: 10px auto;
 	}
-	
+
 	.message_detail_container .wrapper {
 	    position: absolute;
 	    z-index: 1;
@@ -485,14 +648,14 @@ export default {
 	    width: 100%;
 	    overflow: auto;
 	}
-	
+
 	.message_detail_container .scroller {
 	    position: absolute;
 	    z-index: 1;
 	    width: 100%;
 	    padding: 0;
 	}
-	
+
 	.message_detail_container .pull_down,
 	.pull_up {
 	    background: #fff;
@@ -502,7 +665,7 @@ export default {
 	    font-weight: bold;
 	    font-size: 14px;
 	}
-	
+
 	.message_detail_container .pull_down .pullDownIcon,
 	.message_detail_container .pull_up .pullUpIcon {
 	    display: block;
@@ -514,23 +677,23 @@ export default {
 	    -webkit-transition-property: -webkit-transform;
 	    -webkit-transition-duration: 250ms;
 	}
-	
+
 	.message_detail_container .pull_down .pullDownIcon {
 	    -webkit-transform: rotate(0deg) translateZ(0);
 	}
-	
+
 	.message_detail_container .pull_up .pullUpIcon {
 	    -webkit-transform: rotate(-180deg) translateZ(0);
 	}
-	
+
 	.message_detail_container .pull_down.flip .pullDownIcon {
 	    -webkit-transform: rotate(-180deg) translateZ(0);
 	}
-	
+
 	.message_detail_container .pull_up.flip .pullUpIcon {
 	    -webkit-transform: rotate(0deg) translateZ(0);
 	}
-	
+
 	.message_detail_container .pull_down.loading .pullDownIcon,
 	.message_detail_container .pull_up.loading .pullUpIcon {
 	    background-position: 0 100%;
@@ -541,7 +704,7 @@ export default {
 	    -webkit-animation-iteration-count: infinite;
 	    -webkit-animation-timing-function: linear;
 	}
-	
+
 	@-webkit-keyframes loading {
 	    from {
 	        -webkit-transform: rotate(0deg) translateZ(0);

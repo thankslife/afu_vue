@@ -1,58 +1,62 @@
 <template>
     <div class="slider_delete"
-        @touchstart.stop="touchStart($event)"   
-        @touchend.stop="touchEnd($event)"  
-        @touchmove.stop="touchMove($event)">  
-        <div class="delete_item" :class="{delete_status: (showDeleteBtn && noticeHideDeleteBtn)}">
+        @touchstart.stop="touchStart($event)"
+        @touchend.stop="touchEnd($event)"
+        @touchmove.stop="touchMove($event)">
+        <div class="delete_item" :class="{delete_status: subShowDeleteBtn}">
             <slot></slot>
         </div>
-        <span class="deleta_btn" :class="{show: (showDeleteBtn && noticeHideDeleteBtn)}"></span>
+        <span class="deleta_btn" :class="{show: subShowDeleteBtn}" @click="removeItem"></span>
     </div>
 </template>
 
 <script>
-    /*  
-     * 滑动配置。distance 滑动距离 
-     */  
+    /*
+     * 滑动配置。distance 滑动距离
+     */
     export default({
         data() {
             return {
                 startPos:{x:0,y:0},
                 endPos:{x:0,y:0},
-                showDeleteBtn: false
+                subShowDeleteBtn: false
             }
         },
-        mounted() {
-            console.log(this.noticeHideDeleteBtn);
+        watch: {
+            hideDeleteBtn: function(val) {
+                if(val) {
+                    this.subShowDeleteBtn = !val;
+                }
+            }
         },
-        props: ['sliderConf', 'noticeHideDeleteBtn'],
+        props: ['sliderConf', 'hideDeleteBtn'],
         methods: {
             touchStart(e) {
-                e.preventDefault();
+                // e.preventDefault();
                 this.startPos.x = e.targetTouches[0].screenX;
-                console.log(this.startPos.x);
-                // this.transformStartX = this.transformX;  
             },
             touchMove(e) {
-                e.preventDefault();
-                var x = e.targetTouches[0].screenX; 
-                var temp = this.startPos.x - x; 
+                // e.preventDefault();
+                var x = e.targetTouches[0].screenX;
+                var temp = this.startPos.x - x;
                 if(temp > this.sliderConf.distance) {
-                    this.showDeleteBtn = true;
+                    this.subShowDeleteBtn = true;
                 } else {
-                    this.showDeleteBtn = false;
+                    this.subShowDeleteBtn = false;
                 }
-            }, 
+            },
             touchEnd(e) {
-                console.log(this.showDeleteBtn, '-----------------',this.noticeHideDeleteBtn);
-                e.preventDefault();
+                // e.preventDefault();
                 var endX = e.changedTouches[0].pageX;
-                console.log(endX, '===========', endX - this.startPos.x);
                 if(endX - this.startPos.x > -10) {
-                    this.showDeleteBtn = false;
+                    this.subShowDeleteBtn = false;
                 }
+            },
+            removeItem() {
+                console.log(123);
+                this.$emit('removeDeleteItem');
             }
-        }  
+        }
     })
 </script>
 
