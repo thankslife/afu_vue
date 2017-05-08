@@ -98,6 +98,8 @@ export default {
     }
 
     .my_message_main_contain .contain_item {
+        width: 100%;
+        box-sizing: border-box;
     	padding: 0.695652rem;
     	font-size: 0;
     	display: block;

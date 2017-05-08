@@ -6,7 +6,7 @@
 		<div class="chat_box" :class="{blur_status: this.blurStatus}">
 			<div class="wrapper" id="wrapper">
 				<div class="scroller">
-					<div id="pullDown" class="pull_down">
+					<div id="pullDown">
 						<span class="pullDownIcon"></span><span class="pullDownLabel">Pull down to refresh...</span>
 					</div>
 
@@ -29,7 +29,18 @@
 						</div>
 
 						<ul id="msgList" class="msg_list">
-							<li class="dialog_box_mine">
+							<template v-for="item in msgList">
+								<li class="dialog_box_mine" v-if="item.dialogStatus == 'mine'">
+									<span class="dialog content_box">{{item.text}}</span>
+								</li>
+								<li class="dialog_box_others" v-else-if="item.dialogStatus == 'others'">
+									<span class="dialog content_box">{{item.text}}</span>
+								</li>
+								<li class="dialog_box_sys" v-else-if="item.dialogStatus == 'sys'">
+									<span class="sys_tip">{{item.text}}</span>
+								</li>
+							</template>
+							<!-- <li class="dialog_box_mine">
 								<span class="dialog content_box">
 									Lorem ipsum dolor sit amet, consectetur adipisicing elit. Est cumque aliquid ducimus perferendis ratione, optio aut praesentium quos fugiat at non odit voluptate obcaecati. Aperiam eos voluptas ducimus magni possimus?
 								</span>
@@ -39,24 +50,27 @@
 							</li>
                             <li class="dialog_box_others">
                                 <span class="dialog content_box">你好，我是你的C医O王大头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦</span>
-                            </li>
+                            </li> -->
 						</ul>
 					</div>
 
-					<div id="pullUp" class="pull_uown">
+					<div id="pullUp">
 						<span class="pullUpIcon"></span><span class="pullUpLabel">Pull up to refresh...</span>
 					</div>
 				</div>
 			</div>
 			<div class="input_box">
 				<span class="quick_reply_btn" @click.stop="toggleQuickReplyBox" @touchstart.stop=""></span>
-				<textarea name="" id="" rows="1" cols="18" @keyup="resizeTextarea($event, 1);" placeholder="请输入你的信息" v-model="msgContent" id="msgContent" class="msg_content">
+				<textarea name="" id="" rows="1" cols="18" @keyup="resizeTextarea($event, 1);" placeholder="请输入你的信息" v-model="msgContent" id="msgContent" class="msg_content" @focus="hideComponent">
         <div></div>
                 </textarea>
 				<div class="send_box">
-					<a href="javascript:;" class="send_btn">
-						发送<!-- <pre class="tip" ng-if="isMsgEmpty">发送内容不能为空</pre> -->
-					</a>
+					<span class="send_btn" :class="{send_status: send_status, more_fn_status: more_fn_status}" @click="handleSendStatus" @touchstart.stop=""></span>
+					<div class="more_send_fn_btn_box" :class="{show: !more_fn_status}">
+						<span :class="{flipInX: !more_fn_status}" class="animated more_send_fn_btn ask_medical_records" @touchstart.stop=""  @click="askMedicalRecords"></span>
+						<span :class="{flipInX: !more_fn_status}" class="animated more_send_fn_btn acquaintance_zoned" @touchstart.stop=""></span>
+						<span :class="{flipInX: !more_fn_status}" class="animated more_send_fn_btn pay_tip" @touchstart.stop=""></span>
+					</div>
 				</div>
 				<div class="split_line"></div>
 				<div class="quick_reply_out_box" id="quickReplyOutBox" @touchstart.stop="">
@@ -102,13 +116,23 @@ export default {
                 {'text': '你好，我是你的C医O里小头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦', 'hideDeleteBtn': false},
                 {'text': '你好，我是你的C医O哈大头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦', 'hideDeleteBtn': false}
 			],
+			msgList: [
+				{'text': '你好，我是你的C医O王大头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦', 'dialogStatus': 'mine'},
+				{'text': '123', 'dialogStatus': 'others'},
+				{'text': '你好，我是你的C医O王大头，我擅长治疗的疾病是我又来凑字数了，测试文本过多时候的显示方式，憋文字憋的好辛苦', 'dialogStatus': 'others'},
+				{'text': 'C医O请求你发送病历', 'dialogStatus': 'sys'},
+			],
 			sliderConf:{//左滑删除组件配置，设置为左滑距离超过10时显示删除按钮
                 distance: 10,
             },
+            myScroll: null,
             // 出现弹框时弹出蒙层，须将背景虚化，由此变量标识
             blurStatus: false,
             newQuickReply: '',
-            msgContent: ''
+            msgContent: '',
+            send_status: false,
+            // 默认情况下输入框为空，此时放按钮处于点击后就展开隐藏的功能按钮的状态
+            more_fn_status: true
 		}
 	},
 
@@ -117,6 +141,8 @@ export default {
 			pullDownEl, pullDownOffset,
 			pullUpEl, pullUpOffset,
 			generatedCount = 0;
+
+		var that = this;
 
 		function pullDownAction () {
 			setTimeout(function () {	// <-- Simulate network congestion, remove setTimeout from production!
@@ -134,11 +160,15 @@ export default {
 				el = document.getElementById('msgBox');
 
 				var str = '<li class="dialog_box_mine"><span class="dialog content_box">上拉加载的模拟数据</span></li><li class="dialog_box_others"><span class="dialog content_box">123</span></li>';
+				console.log(this.msgList);
+				this.msgList = this.msgList.concat([{'text': '上拉加载的模拟数据', 'dialogStatus': 'others'}, {'text': '上拉加载的模拟数据', 'dialogStatus': 'mine'}]);
+				// $('#msgList').append(str);
 
-				$('#msgList').append(str);
-
-				myScroll.refresh();		// Remember to refresh when contents are loaded (ie: on ajax completion)
-			}, 1000);	// <-- Simulate network congestion, remove setTimeout from production!
+				setTimeout(function() {
+					myScroll.refresh();
+					myScroll.scrollToElement($('#msgList li:last-child')[0], 240);
+				}, 240);
+			}.bind(this), 1000);	// <-- Simulate network congestion, remove setTimeout from production!
 		}
 
 		function loaded() {
@@ -182,11 +212,11 @@ export default {
 					if (pullDownEl.className.match('flip')) {
 						pullDownEl.className = 'loading';
 						pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Loading...';
-						pullDownAction();	// Execute custom function (ajax call?)
+						pullDownAction.call(that);	// Execute custom function (ajax call?)
 					} else if (pullUpEl.className.match('flip')) {
 						pullUpEl.className = 'loading';
 						pullUpEl.querySelector('.pullUpLabel').innerHTML = 'Loading...';
-						pullUpAction();	// Execute custom function (ajax call?)
+						pullUpAction.call(that);	// Execute custom function (ajax call?)
 					}
 				}
 			});
@@ -196,35 +226,33 @@ export default {
 
 		// document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
 		loaded();
+
+		this.myScroll = myScroll;
+
 	},
 
 	methods: {
 		resizeTextarea(event, row) {
-            console.log(event.target);
             if (!event) {
                 return
             }
             if (!row) {
                 row = 3;
-                console.log(11223);
             }
             var b = event.target.value.split("\n");
             var c = 0;
             c += b.length;
 
             var d = event.target.cols;
-            console.log(d);
             if (d <= 10) {
                 d = 12
             }
             for (var e = 0; e < b.length; e++) {
-                console.log(b[e].length, '===============', d);
                 if (b[e].length >= d) {
                     c += Math.ceil(b[e].length / d)
                 }
             }
             c = Math.max(c, row);
-            console.log(b, c);
             c = c > 4 ? 4 : c;
             if (c != event.target.rows) {
                 event.target.rows = c;
@@ -241,12 +269,11 @@ export default {
                 });
 	    	} else {
 	    		$('#quickReplyOutBox').slideDown(240);
-                this.quickReplyList.forEach(function(item, index) {
-                if(item.hideDeleteBtn) {
-                    item.hideDeleteBtn = false;
-                }
-            });
-
+	                this.quickReplyList.forEach(function(item, index) {
+	                if(item.hideDeleteBtn) {
+	                    item.hideDeleteBtn = false;
+	                }
+	            });
 	    	}
 	    },
 
@@ -257,11 +284,11 @@ export default {
                     item.hideDeleteBtn = true;
                 }
             });
+            this.more_fn_status = true;
 	    },
 
         removeDeleteItem(index) {
             this.quickReplyList = this.quickReplyList.slice(1);
-            console.log(this.quickReplyList);
         },
 
         addQuickReply() {
@@ -289,17 +316,65 @@ export default {
             this.msgContent = this.quickReplyList[index].text;
             this.toggleQuickReplyBox();
             $('#msgContent').facus();
+        },
 
-        }
+        handleSendStatus() {
+        	if(this.send_status) {
+        		this.sendMsg();
+        		this.msgContent = '';
+        		console.log('发送');
+        		
+        	} else {
+        		this.more_fn_status = !this.more_fn_status;
+        	}
+        },
+
+        askMedicalRecords() {
+        	this.msgList.push({'text': 'C医O请求你发送病历', 'dialogStatus': 'sys'});
+        	// $('#msgList').append('<li><span class="sys_tip"></span></li>');
+        	this.myScroll.refresh();
+        	this.myScroll.scrollToElement($('#msgList li:last-child')[0], 240);
+        	this.more_fn_status = true;
+        },
+
+        sendMsg() {
+	        var $msg = $('#msgContent');
+	        if(this.msgContent === '') {
+	            return;
+	        } else {
+
+	            this.msgList.push({'text': this.msgContent, 'dialogStatus': 'mine'});
+	        	
+	            this.msgContent = '';
+	            setTimeout(function() {
+	            	this.myScroll.refresh();
+	            	this.myScroll.scrollToElement($('#msgList li:last-child')[0], 240);
+
+	            }.bind(this), 800);
+	        }
+	    },
 	},
 	components: {
 		slidebar,
 		sliderDelete,
+	},
+	watch: {
+		msgContent: function(val) {
+			if(val != '') {
+				this.send_status = true;
+			} else {
+				this.send_status = false;
+			}
+		}
 	}
 }
 </script>
 
 <style>
+
+	.message_detail_container textarea {
+		resize: none;
+	}
 
     .alert_hover {
         position: fixed;
@@ -330,9 +405,42 @@ export default {
         }
     }
 
-    .fadeIn {
-      animation-name: fadeIn;
-    }
+    @keyframes flipInX {
+    	from {
+    		-webkit-transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+    		transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+	    	-webkit-animation-timing-function: ease-in;
+	    	animation-timing-function: ease-in;
+	    	opacity: 0;
+	    }
+
+	  	40% {
+	  		-webkit-transform: perspective(400px) rotate3d(1, 0, 0, -20deg);
+		    transform: perspective(400px) rotate3d(1, 0, 0, -20deg);
+		    -webkit-animation-timing-function: ease-in;
+		    animation-timing-function: ease-in;
+	  	}
+
+	  	60% {
+		    -webkit-transform: perspective(400px) rotate3d(1, 0, 0, 10deg);
+		    transform: perspective(400px) rotate3d(1, 0, 0, 10deg);
+		    opacity: 1;
+	  	}
+
+	  	80% {
+		    -webkit-transform: perspective(400px) rotate3d(1, 0, 0, -5deg);
+		    transform: perspective(400px) rotate3d(1, 0, 0, -5deg);
+	  	}
+
+	  	to {
+		    -webkit-transform: perspective(400px);
+		    transform: perspective(400px);
+	  	}
+	}
+
+	.flipInX {
+		animation-name: flipInX;
+	}
 
     .animated {
         animation-duration: 1s;
@@ -357,7 +465,7 @@ export default {
     }
 
     .add_quick_reply_box .content_box {
-        margin: 32px auto;
+        margin: 32px auto 20px auto;
         width: 90%;
         height: 150px;
     }
@@ -367,6 +475,20 @@ export default {
         height: 100%;
         border: none;
         outline: none;
+    }
+
+    .message_detail_container .confirm_btn_box {
+    	line-height: 40px;
+    	text-align: center;
+    	margin-bottom: 20px;
+    }
+
+    .confirm_btn_box span {
+    	display: inline-block;
+    	border-radius: 100px;
+    	background: #8fb9fb;
+    	color: #fff;
+    	min-width: 40px;
     }
 
 
@@ -405,7 +527,6 @@ export default {
 		padding: 0 5px;
 		margin-bottom: 14px;
         min-height: 16px;
-		resize: none;
         font-family: 'Microsoft Yahei';
         letter-spacing: 1px;
 	}
@@ -425,8 +546,70 @@ export default {
 		width: 12.5%;
 		padding-right: 5%;
 		text-align: right;
-		line-height: 40px;
+		height: 40px;
 		font-size: 14px;
+		position: relative;
+	}
+
+	.message_detail_container .more_send_fn_btn_box {
+		position: absolute;
+		right: 10px;
+		bottom: 110%;
+		background: #fff;
+		border-radius: 100px;
+		white-space: nowrap;
+		padding: 10px 20px;
+		box-shadow: 0 0 10px 3px rgba(0, 0, 0, .1);
+		display: none;
+	}
+
+	.message_detail_container .more_send_fn_btn_box.show {
+		display: block;
+	}
+
+	.more_send_fn_btn + .more_send_fn_btn {
+		margin-left: 20px;
+	}
+
+	.more_send_fn_btn_box .more_send_fn_btn {
+		display: inline-block;
+		vertical-align: middle;
+		width: 28px;
+		height: 28px;
+		background: url('../../images/ask_medical_records_icon.png') center no-repeat;
+		background-size: 100% auto;
+	}
+
+	.more_send_fn_btn.ask_medical_records {
+		background-image: url('../../images/ask_medical_records_icon.png');
+	}
+
+	.more_send_fn_btn.acquaintance_zoned {
+		background-image: url('../../images/acquaintance_zoned_icon.png');
+	}
+
+	.more_send_fn_btn.pay_tip {
+		background-image: url('../../images/pay_tip_icon.png');
+	}
+
+	.message_detail_container .send_btn {
+		width: 28px;
+		height: 40px;
+		display: inline-block;
+		background: url('../../images/retract_status_icon.png') center 5px no-repeat;
+		background-size: 100% auto;
+	}
+
+	.message_detail_container .send_btn.send_status {
+		background-image: url('../../images/send_status_icon.png');
+	}
+
+	.send_btn.more_fn_status {
+		background-image: url('../../images/more_fn_status_icon.png');
+	}
+
+	.send_btn.retract_status {
+		background-image: url('../../images/retract_status_icon.png');
 	}
 
 	.message_detail_container .quick_reply_out_box {
@@ -574,7 +757,7 @@ export default {
 
 	.message_detail_container .msg_box {
 	    overflow: hidden;
-	    min-height: 100%;
+	    min-height: calc(100vh - 45px - 2.4rem);
 	    padding: 3%;
 	}
 
@@ -629,14 +812,19 @@ export default {
 	    min-height: 32px;
 	}
 
+	.message_detail_container .dialog_box_sys {
+		text-align: center;
+	}
+
 	.message_detail_container .sys_tip {
-	    line-height: 18px;
-	    display: block;
-	    width: 32%;
-	    background: rgba(0, 0, 0, .06);
+	    line-height: 22px;
+	    height: 22px;
+	    display: inline-block;
+	    background: #dadada;
 	    color: #fff;
 	    text-align: center;
 	    margin: 10px auto;
+	    padding: 0 10px;
 	}
 
 	.message_detail_container .wrapper {
@@ -656,46 +844,58 @@ export default {
 	    padding: 0;
 	}
 
-	.message_detail_container .pull_down,
-	.pull_up {
-	    background: #fff;
+	.message_detail_container #pullDown,
+	.message_detail_container #pullUp {
 	    height: 40px;
 	    line-height: 40px;
 	    padding: 5px 10px;
-	    font-weight: bold;
-	    font-size: 14px;
+	    text-align: center;
 	}
 
-	.message_detail_container .pull_down .pullDownIcon,
-	.message_detail_container .pull_up .pullUpIcon {
-	    display: block;
-	    float: left;
-	    width: 40px;
-	    height: 40px;
+	.message_detail_container #pullDown span,
+	.message_detail_container #pullUp span {
+		display: inline-block;
+		vertical-align: middle;
+	}
+
+	.message_detail_container #pullDown .pullDownIcon,
+	.message_detail_container #pullUp .pullUpIcon {
+	    width: 20px;
+	    height: 20px;
 	    background: url(../../images/pull_icon.png) 0 0 no-repeat;
-	    background-size: 40px 80px;
+	    background-size: 20px 40px;
 	    -webkit-transition-property: -webkit-transform;
 	    -webkit-transition-duration: 250ms;
 	}
 
-	.message_detail_container .pull_down .pullDownIcon {
+	.message_detail_container #pullDown .pullDownIcon {
 	    -webkit-transform: rotate(0deg) translateZ(0);
 	}
 
-	.message_detail_container .pull_up .pullUpIcon {
+	.message_detail_container #pullUp .pullUpIcon {
 	    -webkit-transform: rotate(-180deg) translateZ(0);
 	}
 
-	.message_detail_container .pull_down.flip .pullDownIcon {
+	.message_detail_container #pullUp {
+		transform: translateY(100px);
+		transition: transform .5s;
+	}
+
+	.message_detail_container #pullUp.flip,
+	.message_detail_container #pullUp.loading {
+		transform: translateY(-32px);
+	}
+
+	.message_detail_container #pullDown.flip .pullDownIcon {
 	    -webkit-transform: rotate(-180deg) translateZ(0);
 	}
 
-	.message_detail_container .pull_up.flip .pullUpIcon {
+	.message_detail_container #pullUp.flip .pullUpIcon {
 	    -webkit-transform: rotate(0deg) translateZ(0);
 	}
 
-	.message_detail_container .pull_down.loading .pullDownIcon,
-	.message_detail_container .pull_up.loading .pullUpIcon {
+	.message_detail_container #pullDown.loading .pullDownIcon,
+	.message_detail_container #pullUp.loading .pullUpIcon {
 	    background-position: 0 100%;
 	    -webkit-transform: rotate(0deg) translateZ(0);
 	    -webkit-transition-duration: 0ms;
