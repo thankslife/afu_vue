@@ -2,64 +2,24 @@
 	<div class="my_connection_container main_container_box" :class="{slide_left: this.$store.state.spreadSidebar}">
 		<slidebar></slidebar>
 		<span class="ceo_icon"></span>
-		<filter-bar :filterList="filterList"></filter-bar>
+		<filter-bar :filterList="filterList" :cancelFilter="cancelFilter" :applyFilter="applyFilter"></filter-bar>
 		<div class="main_contain my_connection_main_contain">
-			<div class="contain_item content_box">
-				<div class="person_img_box">
-					<img src="../../images/connection4.jpg" alt="">
-					<i class="authenticate_icon"></i>
-				</div>
-				<p class="person_name">李溜溜</p>
-				<span class="split_line"></span>
-				<div class="info_box">
-					<p>主任医师</p>
-					<p>神经外科</p>
-					<p>上海市第六人民医院</p>
-					<span class="price">¥150</span>
-				</div>
-			</div>
-			<div class="contain_item content_box">
-				<div class="person_img_box">
-					<img src="../../images/connection4.jpg" alt="">
-					<i class="authenticate_icon"></i>
-				</div>
-				<p class="person_name">李溜溜</p>
-				<span class="split_line"></span>
-				<div class="info_box">
-					<p>主任医师</p>
-					<p>神经外科</p>
-					<p>上海市第六人民医院</p>
-					<span class="price">¥150</span>
-				</div>
-			</div>
-			<div class="contain_item content_box">
-				<div class="person_img_box">
-					<img src="../../images/connection4.jpg" alt="">
-					<i class="authenticate_icon"></i>
-				</div>
-				<p class="person_name">李溜溜</p>
-				<span class="split_line"></span>
-				<div class="info_box">
-					<p>主任医师</p>
-					<p>神经外科</p>
-					<p>上海市第六人民医院</p>
-					<span class="price">¥150</span>
-				</div>
-			</div>
-			<div class="contain_item content_box">
-				<div class="person_img_box">
-					<img src="../../images/connection4.jpg" alt="">
-					<i class="authenticate_icon"></i>
-				</div>
-				<p class="person_name">李溜溜</p>
-				<span class="split_line"></span>
-				<div class="info_box">
-					<p>主任医师</p>
-					<p>神经外科</p>
-					<p>上海市第六人民医院</p>
-					<span class="price">¥150</span>
-				</div>
-			</div>
+			<ul class="my_connection_list">
+				<li class="contain_item content_box" v-for="item in myConnectionList">
+					<div class="person_img_box">
+						<img :src="item.imgSrc">
+						<i class="authenticate_icon" v-if="item.isAuthenticate"></i>
+					</div>
+					<p class="person_name">{{item.name}}</p>
+					<span class="split_line"></span>
+					<div class="info_box">
+						<p>{{item.academicTitle}}</p>
+						<p>{{item.department}}</p>
+						<p>{{item.location}}</p>
+						<span class="price">¥{{item.price}}</span>
+					</div>
+				</li>
+			</ul>
 		</div>
 	</div>
 </template>
@@ -85,9 +45,88 @@
 					'text': '推荐医生',
 					'isActive': false
 				},
+			],
+			myConnectionList: [
+				{
+					"name": "李溜溜",
+					"academicTitle": "主任医师",
+					"department": "神经外科",
+					"location": "上海市第六人民医院",
+					"imgSrc": require('../../images/connection4.jpg'),
+					"price": 150
+				},
+				{
+					"name": "李溜溜",
+					"academicTitle": "主任医师",
+					"department": "神经外科",
+					"location": "上海市第一人民医院",
+					"imgSrc": require('../../images/connection4.jpg'),
+					"price": 100
+				},
+				{
+					"name": "李溜溜",
+					"academicTitle": "主任医师",
+					"department": "神经外科",
+					"location": "上海市第六人民医院",
+					"imgSrc": require('../../images/connection4.jpg'),
+					"price": 120
+				}
 			]
 		}
 	},
+
+	methods: {
+		/**
+		 * 由父组件实现取消使用过滤条件的函数再传递给子组件filter-bar使用，对接数据时可在此函数中书写取消过滤条件时请求数据的代码
+		 * @return {[type]} [description]
+		 */
+		cancelFilter() {
+
+			this.myConnectionList = [
+				{
+					"name": "李溜溜",
+					"academicTitle": "主任医师",
+					"department": "神经外科",
+					"location": "上海市第六人民医院",
+					"imgSrc": require('../../images/connection4.jpg'),
+					"price": 150
+				},
+				{
+					"name": "李溜溜",
+					"academicTitle": "主任医师",
+					"department": "神经外科",
+					"location": "上海市第一人民医院",
+					"imgSrc": require('../../images/connection4.jpg'),
+					"price": 100
+				},
+				{
+					"name": "李溜溜",
+					"academicTitle": "主任医师",
+					"department": "神经外科",
+					"location": "上海市第六人民医院",
+					"imgSrc": require('../../images/connection4.jpg'),
+					"price": 120
+				}
+			];
+		},
+
+		/**
+		 * 由父组件实现使用过滤条件的函数再传递给子组件filter-bar使用，对接数据时可在此函数中书写使用相应过滤条件时请求数据的代码
+		 * @param  {[type]} index [description]
+		 * @return {[type]}       [description]
+		 */
+		applyFilter(index) {
+			this.myConnectionList = [{
+					"name": "模拟过滤数据",
+					"academicTitle": "主任医师",
+					"department": "神经外科",
+					"location": "上海市第六人民医院",
+					"imgSrc": require('../../images/connection4.jpg'),
+					"price": 120
+				}];
+		}
+	},
+
 	components: {
 		slidebar,
 		filterBar
@@ -127,7 +166,11 @@
         padding-top: 0.618rem;
         width: 90%;
         margin: 0 auto;
-        display: flex;
+    }
+
+    .my_connection_main_contain .my_connection_list {
+    	width: 100%;
+    	display: flex;
         flex-flow: row wrap;
         justify-content: space-between;
     }
@@ -136,6 +179,7 @@
     	width: 47.22%;
     	margin-bottom: 5.56%;
     	padding-top: 0.695652rem;
+    	display: inline-block;
     }
 
     .my_connection_main_contain .person_img_box {

@@ -3,6 +3,7 @@ import App from '../App'
 const home = r => require.ensure([], () => r(require('../page/home/home')), 'home')
 const calendars = r => require.ensure([], () => r(require('../page/calendars/calendars')), 'calendars')
 const calendar = r => require.ensure([], () => r(require('../page/calendar/calendar')), 'calendar')
+const medicalRecordsList = r => require.ensure([], () => r(require('../page/my_medical_records/medical_records_list')), 'my_medical_records')
 const myConnection = r => require.ensure([], () => r(require('../page/my_connection/my_connection')), 'my_connection')
 const myMessage = r => require.ensure([], () => r(require('../page/my_message/my_message')), 'my_message')
 const messageDetail = r => require.ensure([], () => r(require('../page/my_message/message_detail')), 'message_detail')
@@ -39,6 +40,12 @@ export default [{
         component: myConnection,
         meta: {
             title: '我的人脉'
+        }
+    }, {
+        path: '/medical_records_list',
+        component: medicalRecordsList,
+        meta: {
+            title: '我的病历'
         }
     }, {
         path: '/my_message',

@@ -67,7 +67,7 @@ export default {
                     subList: [
                         {
                             itemName: '我的病历',
-                            to: '/calendars',
+                            to: '/medical_records_list',
                             isLink: true
                         },
                         {
