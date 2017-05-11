@@ -100,9 +100,8 @@
         width: 100%;
         height: 100%;
         background: url('../../images/setting.png') center no-repeat #dfdfdf;
-        background-size: 80% auto;
+        background-size: 100% auto;
         font-size: 0;
-        border: 1px solid #dfdfdf;
         box-sizing: border-box;
         border-radius: 100px;
 

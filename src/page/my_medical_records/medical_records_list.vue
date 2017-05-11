@@ -3,6 +3,7 @@
 		<slidebar></slidebar>
 		<span class="ceo_icon"></span>
 		<filter-bar :filterList="filterList" :cancelFilter="cancelFilter" :applyFilter="applyFilter"></filter-bar>
+		<function-menu :fnList="fnList" v-if="isOver"></function-menu>
 		<div class="main_contain medical_records_list_main_contain">
 			<ul class="medical_records_list">
 				<li class="patient_info_box content_box" v-for="item in medicalRecordsList">
@@ -31,6 +32,7 @@
 <script>
 	import slidebar from '../../components/common/sidebar.vue';
 	import filterBar from '../../components/common/filter_bar.vue';
+	import functionMenu from '../../components/common/function_menu.vue';
 
 	export default {
 	name: 'my_connection',
@@ -67,7 +69,17 @@
 					"from": "我的病患",
 					"time": "2017-4-25"
 				}
-			]
+			],
+			fnList: [
+				{
+                    url: require('../../images/save_medical_records_icon.png'),
+                    isLink: false,
+                    cb: function() {
+                        console.log('若点击按钮后的事件处理函数');
+                    }
+                }
+			],
+			isOver: false
 		}
 	},
 	methods: {
@@ -76,7 +88,7 @@
 		 * @return {[type]} [description]
 		 */
 		cancelFilter() {
-			console.log('');
+			this.isOver = false;
 
 			this.medicalRecordsList = [
 				{
@@ -113,11 +125,18 @@
 				"from": "朗云医生",
 				"time": "2017-4-25"
 			}];
+
+			if(index == 2) {
+				this.isOver = true;
+			} else {
+				this.isOver = false;
+			}
 		}
 	},
 	components: {
 		slidebar,
-		filterBar
+		filterBar,
+		functionMenu
 	}
 }
 </script>
